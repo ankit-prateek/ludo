@@ -1,0 +1,470 @@
+﻿<html>
+
+<head>
+
+    <title>ludo</title>
+    <style>
+        body {
+            background: url(./bg.jpg);
+            background-size: cover;
+
+
+        }
+
+        .ludo {
+            margin-left: 100px;
+            margin-top: 60px;
+            width: 500px;
+            height: 500px;
+            background: url('./board.png');
+            background-size: cover;
+        }
+
+        #dice {
+            padding: 15px;
+            background-color: aqua;
+            width: 70px;
+            height: 50px;
+            text-align: center;
+        }
+
+        .cell {
+            width: 28px;
+            height: 28px;
+            margin-left: 2px;
+            margin-right: 4px;
+            margin-top: 2px;
+            margin-bottom: 3px;
+            border-radius: 50%;
+        }
+
+        .goti {
+            background-color: red;
+        }
+    </style>
+    <script>
+        var next = false
+        var num = 1;
+        var color = []
+        var goti = 1
+        var game = false;
+        var prev = true
+        kt = {
+            'red': [101, 101, 101, 101],
+            'blue': [201, 201, 201, 201],
+            'yellow': [301, 301, 301, 301],
+            'green': [401, 401, 401, 401],
+        }
+        var pawn = {}
+        var chance = -1
+        var mark = 0;
+        var myplayer = [1, 2, 3, 4]
+        var safe = { "1": true, "48": true, "40": true, "9": true, "35": true, "14": true, "27": true, "22": true }
+        function starter() {
+            if (game) {
+                if (confirm("Are you sure you want to end the game") == true) {
+
+
+                    game = false
+                    document.getElementById('gamestart').innerText = "Start Game"
+                    for (var key in pawn) {
+                        for (var i = 0; i < 4; i++) {
+                            if (pawn[key][i] !== 1000)
+
+                                document.getElementById(pawn[key][i]).style.backgroundColor = null
+
+                        }
+                    }
+                }
+
+            }
+            else {
+                let value = prompt("Enter numbers of players", 4);
+                if (!(value == null || value == "")) {
+                    num = parseInt(value)
+                    color = ["red", "blue", "yellow", "green"].slice(0, num)
+                    for (var i = 0; i < num; i++) pawn[color[i]] = [...kt[color[i]]]
+                    game = true
+                    document.getElementById('gamestart').innerText = "End Game"
+                    for (var key in pawn) {
+                        for (var i = 0; i < 4; i++) {
+                            if (pawn[key][i] !== 1000) {
+                                if (key == "red")
+                                    document.getElementById(pawn[key][i]).style.backgroundColor = "#ba0000"
+                                else
+                                    document.getElementById(pawn[key][i]).style.backgroundColor = key
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        function check(i, j) {
+            var imax = { "red": 100, "blue": 200, "yellow": 300, "green": 400 }
+            var start = { "red": 1, "blue": 14, "yellow": 27, "green": 40 }
+            var imin = { "red": 51, "blue": 12, "yellow": 25, "green": 38 }
+            var pos = i + 1
+            i = color[i]
+            imin = imin[i]
+            imax = imax[i]
+            var temp = document.getElementById(pawn[i][j]);
+            temp.style.backgroundColor = null
+           
+            if (pawn[i][j] + mark > imax + 5) {
+                if (pawn[i][j] + mark == imax + 6) {
+                    pawn[i][j] = 1000
+                    var temp = document.getElementById("s1")
+                    temp.innerText = i + " reached home"
+                    next = true
+                    temp.style.color = i
+                    setTimeout(() => temp.innerText = null, 5000)
+                    if (pawn[i][0] == 1000 && pawn[i][1] == 1000 && pawn[i][2] == 1000 && pawn[i][3] == 1000) {
+                        const index = color.indexOf(i);
+                        if (index > -1) {
+                            color.splice(index, 1);
+
+                        }
+                        var temp = document.getElementById("s1")
+                        temp.innerText = "Winner is " + i
+                        temp.style.color = i
+                        prev = false
+                        next=true
+                        setTimeout(() => temp.innerText = null, 5000)
+                        if (color.length === 0) {
+                            game = false
+                            next=false
+                            chance-=1
+                            var temp = document.getElementById("s1")
+                            temp.innerText = "Game End"
+                            document.getElementById('gamestart').innerText = "Start Game"
+                            temp.style.color = "white"
+                            setTimeout(() => temp.innerText = null, 10000)
+                            
+
+                        }
+
+
+                    }
+                }
+                else {
+                    return 'not'
+                }
+
+            }
+            else {
+                if (pawn[i][j] > imax) {
+                    pawn[i][j] += mark
+                }
+                else {
+                    if (pawn[i][j] + mark > imin && pawn[i][j] <= imin) {
+                        pawn[i][j] += mark
+                        pawn[i][j] -= imin
+                        pawn[i][j] += imax
+                        if (pawn[i][j] == imax + 6) {
+                            const index = color.indexOf(i);
+                            if (index > -1) {
+                                color.splice(index, 1);
+                            }
+                            var temp = document.getElementById("s1")
+                            temp.innerText = i + " reached home"
+                            next = true
+                            temp.style.color = i
+                            setTimeout(() => temp.innerText = null, 5000)
+                            pawn[i][j] = 1000
+                            if (color.length === 0) {
+                                game = false
+                                next = false
+                                chance-=1
+                                var temp = document.getElementById("s1")
+                                temp.innerText = "Game End"
+                                document.getElementById('gamestart').innerText = "Start Game"
+                                temp.style.color = "white"
+                                setTimeout(() => temp.innerText = null, 10000)
+
+                            }
+                        }
+
+                    }
+                    else {
+                        pawn[i][j] += mark
+                        if (pawn[i][j] >= 53) {
+                            pawn[i][j] %= 53
+                            pawn[i][j] += 1
+                        }
+                    }
+                }
+            }
+            for (var key in pawn) {
+                if (key != i) {
+                    for (var k = 0; k < 4; k++) {
+                        if (pawn[i][j] == pawn[key][k] && !safe[pawn[key][k]] && pawn[key][k] != 1000) {
+                            var temp = document.getElementById("s1")
+                            temp.innerText = key + ' defeated by ' + i;
+                            temp.style.color = i
+                            setTimeout(() => temp.innerText = null, 3000)
+                            pawn[key][k] = start[key]
+                        }
+                    }
+                }
+            }
+            for (var key in pawn) {
+                for (var i = 0; i < 4; i++) {
+                    if (pawn[key][i] !== 1000) {
+                        if (key == "red")
+                            document.getElementById(pawn[key][i]).style.backgroundColor = "#ba0000"
+                        else
+                            document.getElementById(pawn[key][i]).style.backgroundColor = key
+                    }
+
+                }
+            }
+        }
+        function handler(id) {
+            console.log(color,chance,color[chance])
+            id = parseInt(id)
+            var temp = pawn[color[chance]]
+            
+            var text = document.getElementById('player');
+            if (chance != -1) {
+                var tt = temp.indexOf(id);
+                if (tt >= 0) {
+                    if (check(chance, tt) == "not") return
+                    if ((mark != 6 && next == false) && prev) text.innerText = text.style.color = color[(chance + 1) % num]
+                    next = false
+                    prev = true
+                    document.getElementById('action').innerText = "'s turn"
+                }
+                else {
+                    
+                    return
+                }
+                mark = 0
+
+                chance = -1
+               
+            }
+           
+
+
+        }
+
+        function handle() {
+            console.log(color,chance,color[chance])
+            if (game) {
+                if (chance == -1) {
+                    const move = Math.ceil(Math.random() * 6);
+                    document.getElementById("dice").innerHTML = move;
+                    mark = move;
+                    var text = document.getElementById('player');
+                    document.getElementById('action').innerText = "'s move"
+                   
+
+                    switch (text.innerText) {
+                        case "red":
+                            var ch = color.indexOf("red")
+                            var temp = pawn["red"]
+                            if (temp[0] + mark <= 106 || temp[1] + mark <= 106 || temp[2] + mark <= 106 || temp[3] + mark <= 106) {
+                                chance = ch
+
+                            }
+                            else {
+                                chance = ch
+                                document.getElementById('action').innerText = "'s turn"
+                                text.innerText = text.style.color = color[(chance + 1) % color.length]
+                                chance = -1
+                            }
+                            break;
+                        case "blue":
+                            var ch = color.indexOf("blue")
+                            var temp = pawn["blue"]
+                            if (temp[0] + mark <= 206 || temp[1] + mark <= 206 || temp[2] + mark <= 206 || temp[3] + mark <= 206) {
+                                chance = ch
+
+                            }
+                            else {
+                                chance = ch
+                                document.getElementById('action').innerText = "'s turn"
+                                text.innerText = text.style.color = color[(chance + 1) % color.length]
+                                chance = -1
+                            }
+                            break;
+
+                        case "yellow":
+                            var temp = pawn["yellow"]
+                            var ch = color.indexOf("yellow")
+                            if (temp[0] + mark <= 306 || temp[1] + mark <= 306 || temp[2] + mark <= 306 || temp[3] + mark <= 306) {
+                                chance = ch
+
+                            }
+                            else {
+                                chance = ch
+                                document.getElementById('action').innerText = "'s turn"
+                                text.innerText = text.style.color = color[(chance + 1) % color.length]
+                                chance = -1
+                            }
+                            break;
+                        case "green":
+                            var ch = color.indexOf("green")
+                            var temp = pawn["green"]
+                            if (temp[0] + mark <= 406 || temp[1] + mark <= 406 || temp[2] + mark <= 406 || temp[3] + mark <= 406) {
+                                chance = ch
+
+                            }
+                            else {
+                                chance = ch
+                                document.getElementById('action').innerText = "'s turn"
+                               
+                                text.innerText = text.style.color = color[(chance + 1) % color.length]
+                                chance = -1
+                            }
+                            break;
+                    }
+                }
+                
+
+            }
+           
+        }
+
+    </script>
+
+</head>
+
+<body>
+    <div style="display: flex;">
+        <div class="ludo">
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="50" onclick="handler(this.id)"></div>
+                <div class="cell" id="51" onclick="handler(this.id)"></div>
+                <div class="cell" id="52" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="49" onclick="handler(this.id)"></div>
+                <div class="cell" id="101" onclick="handler(this.id)"></div>
+                <div class="cell" id="1" name="safe" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="48" onclick="handler(this.id)" name="safe"></div>
+                <div class="cell" id='102' onclick="handler(this.id)"></div>
+                <div class="cell" id="2" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="47" onclick="handler(this.id)"></div>
+                <div class="cell" id='103' onclick="handler(this.id)"></div>
+                <div class="cell" id="3" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="46" onclick="handler(this.id)"></div>
+                <div class="cell" id="104" onclick="handler(this.id)"></div>
+                <div class="cell" id="4" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="45" onclick="handler(this.id)"></div>
+                <div class="cell" id="105" onclick="handler(this.id)"></div>
+                <div class="cell" id="5" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex; margin-top: 2px;">
+                <div class="cell" id="39" onclick="handler(this.id)"></div>
+                <div class="cell" id="40" name="safe" onclick="handler(this.id)"></div>
+                <div class="cell" id="41" onclick="handler(this.id)"></div>
+                <div class="cell" id="42" onclick="handler(this.id)"></div>
+                <div class="cell" id="43" onclick="handler(this.id)"></div>
+                <div class="cell" id="44" onclick="handler(this.id)"></div>
+                <div class="cell" style="margin-left: 103px;" id="6" onclick="handler(this.id)"></div>
+                <div class="cell" id="7" onclick="handler(this.id)"></div>
+                <div class="cell" id="8" onclick="handler(this.id)"></div>
+                <div class="cell" id="9" onclick="handler(this.id)" name="safe"></div>
+                <div class="cell" id="10" onclick="handler(this.id)"></div>
+                <div class="cell" id="11" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex; margin-top: 2px;">
+                <div class="cell" id="38" onclick="handler(this.id)"></div>
+                <div class="cell" id="401" onclick="handler(this.id)"></div>
+                <div class="cell" id="402" onclick="handler(this.id)"></div>
+                <div class="cell" id="403" onclick="handler(this.id)"></div>
+                <div class="cell" id="404" onclick="handler(this.id)"></div>
+                <div class="cell" id="405" onclick="handler(this.id)"></div>
+                <div class="cell" style="margin-left: 103px;" id="205" onclick="handler(this.id)"></div>
+                <div class="cell" id="204" onclick="handler(this.id)"></div>
+                <div class="cell" id="203" onclick="handler(this.id)"></div>
+                <div class="cell" id="202" onclick="handler(this.id)"></div>
+                <div class="cell" id="201" onclick="handler(this.id)"></div>
+                <div class="cell" id="12" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex; margin-top: 2px;">
+                <div class="cell" id="37" onclick="handler(this.id)"></div>
+                <div class="cell" id="36" onclick="handler(this.id)"></div>
+                <div class="cell" id="35" onclick="handler(this.id)" name="safe"></div>
+                <div class="cell" id="34" onclick="handler(this.id)"></div>
+                <div class="cell" id="33" onclick="handler(this.id)"></div>
+                <div class="cell" id="32" onclick="handler(this.id)"></div>
+                <div class="cell" style="margin-left: 103px;" id="18" onclick="handler(this.id)"></div>
+                <div class="cell" id="17" onclick="handler(this.id)"></div>
+                <div class="cell" id="16" onclick="handler(this.id)"></div>
+                <div class="cell" id="15" onclick="handler(this.id)"></div>
+                <div class="cell" id="14" name="safe" onclick="handler(this.id)"></div>
+                <div class="cell" id="13" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="31" onclick="handler(this.id)"></div>
+                <div class="cell" id="305" onclick="handler(this.id)"></div>
+                <div class="cell" id="19" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="30" onclick="handler(this.id)"></div>
+                <div class="cell" id="304" onclick="handler(this.id)"></div>
+                <div class="cell" id="20" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="29" onclick="handler(this.id)"></div>
+                <div class="cell" id="303" onclick="handler(this.id)"></div>
+                <div class="cell" id="21" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="28" onclick="handler(this.id)"></div>
+                <div class="cell" id="302" onclick="handler(this.id)"></div>
+                <div class="cell" id="22" onclick="handler(this.id)" name="safe"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="27" name="safe" onclick="handler(this.id)"></div>
+                <div class="cell" id="301" onclick="handler(this.id)"></div>
+                <div class="cell" id="23" onclick="handler(this.id)"></div>
+            </div>
+            <div style="display: flex;">
+                <div class="cell" style="margin-left: 203px;" id="26" onclick="handler(this.id)"></div>
+                <div class="cell" id="25" onclick="handler(this.id)"></div>
+                <div class="cell" id="24" onclick="handler(this.id)"></div>
+            </div>
+        </div>
+
+
+
+        <div style="margin-left: 100px; margin-top: 50px; width: 200px; margin-left: 20%;">
+            <h3 id="player" style="float:left; color:red">red</h3>
+            <h4 id="action" style="color: white;"> 's turn</h4>
+            <h1 id="dice">0</h1>
+            <button onclick="handle()">move dice</button>
+
+
+            <button onclick="starter()"
+                style=" color: red; margin-left: -100px; width: 300px; height: 40px; margin-top: 50px; background-color: rgba(70, 255, 240, 0.904);  border:none; border-radius: 6px; "><span
+                    id="gamestart">start game</span></button>
+            <h2 style="margin-top: 110px; margin-left: 50px; font-family: cursive;" id="s1"></h2>
+        </div>
+
+
+        <h3 id="red"></h3>
+
+        <h3 id="blue"></h3>
+
+        <h3 id="yellow"></h3>
+
+        <h3 id="green"></h3>
+
+    </div>
+    <div id="1000"></div>
+
+</body>
+
+</html>
